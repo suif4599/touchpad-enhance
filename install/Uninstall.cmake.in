@@ -1,0 +1,22 @@
+# Find install manifest
+if(NOT EXISTS "@CMAKE_BINARY_DIR@/install_manifest.txt")
+  message(FATAL_ERROR "Cannot find install manifest: @CMAKE_BINARY_DIR@/install_manifest.txt")
+endif()
+
+# Stop service
+message(STATUS "Stopping touchpad-enhance service (if running)...")
+execute_process(COMMAND systemctl stop touchpad-enhance.service OUTPUT_QUIET ERROR_QUIET)
+message(STATUS "Disabling touchpad-enhance service (if existing)...")
+execute_process(COMMAND systemctl disable touchpad-enhance.service OUTPUT_QUIET ERROR_QUIET)
+
+# Uninstall files
+file(READ "@CMAKE_BINARY_DIR@/install_manifest.txt" install_manifest)
+string(REPLACE "\n" ";" install_files_list "${install_manifest}")
+foreach(install_file ${install_files_list})
+    if(EXISTS "${install_file}")
+        message(STATUS "Removing installed file: ${install_file}")
+        file(REMOVE "${install_file}")
+    else()
+        message(STATUS "Installed file not found (skipping): ${install_file}")
+    endif()
+endforeach()
