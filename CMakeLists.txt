@@ -4,7 +4,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(INVERTX "Invert X axis" OFF)
 option(INVERTY "Invert Y axis" OFF)
-option(TOUCHPAD_DEVICE "Specify touchpad device file (e.g., /dev/input/event5)" "")
+set(TOUCHPAD_DEVICE "" CACHE STRING "Specify touchpad device file (e.g., /dev/input/event5). Empty means auto-detect.")
+set(EDGE_WIDTH "0.05" CACHE STRING "Width of the edge region as a fraction of total touchpad width")
+set(SCROLL_THRESHOLD "0.2" CACHE STRING "Minimal vertical movement to trigger a scroll action")
+set(SCROLL_STEP "0.05" CACHE STRING "Movement step for each scroll action")
 
 
 file(GLOB CONTROL_SOURCES "${CMAKE_SOURCE_DIR}/control/*.cpp")
@@ -19,6 +22,11 @@ endif()
 if(TOUCHPAD_DEVICE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE TOUCHPAD_DEVICE="${TOUCHPAD_DEVICE}")
 endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    EDGE_WIDTH=${EDGE_WIDTH}
+    SCROLL_THRESHOLD=${SCROLL_THRESHOLD}
+    SCROLL_STEP=${SCROLL_STEP}
+)
 
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

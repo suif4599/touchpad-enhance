@@ -1,1 +1,4 @@
 build/
+result
+result-*
+.direnv/
