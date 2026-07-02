@@ -13,6 +13,7 @@ set(SCROLL_STEP "0.05" CACHE STRING "Movement step for each scroll action")
 file(GLOB CONTROL_SOURCES "${CMAKE_SOURCE_DIR}/control/*.cpp")
 add_executable(${PROJECT_NAME} main.cpp ${CONTROL_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
+target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 if(INVERTX)
     target_compile_definitions(${PROJECT_NAME} PRIVATE INVERTX=1)
 endif()
@@ -29,7 +30,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 )
 
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+# Control CLI: only needs the IPC client code, not the touchpad/emulator stack.
+add_executable(touchpad-enhance-ctl ctl/main.cpp "${CMAKE_SOURCE_DIR}/control/ipc.cpp")
+target_include_directories(touchpad-enhance-ctl PRIVATE "${CMAKE_SOURCE_DIR}")
+
+
+install(TARGETS ${PROJECT_NAME} touchpad-enhance-ctl DESTINATION bin)
 configure_file("${CMAKE_SOURCE_DIR}/install/touchpad-enhance.service.in"
                "${CMAKE_BINARY_DIR}/touchpad-enhance.service"
                @ONLY)

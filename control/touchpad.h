@@ -3,35 +3,57 @@
 
 #include "config.h"
 #include "control/emulator.h"
+#include "state.h"
+#include <linux/input.h>
 #include <string>
 #include <utility>
+#include <vector>
 
+namespace touchpad {
+    bool isTouchpad(int fd);
+    int openAndGrab(const std::string& deviceFile);
+    int detectAndGrab();
+}
 
 class Touchpad {
     int fd;
+    Emulator& emulator;
+    AtomicState& state;
     bool invertY;
     bool invertX;
-    Emulator& emulator;
     int xMin, xMax, yMin, yMax;
-    int eventX, eventY, eventTouch; // eventTouch: 0 - no event, 1 - touch, -1 - release
-    bool eventDone;
-    bool toProcess; // Whether the touchpad is pressed and always in edge zone
-    bool toActivate; // Whether the touchpad movement exceeds SCROLL_THRESHOLD
-    bool inLeftEdge; // Whether the touch is in left edge zone
-    int startY; // If toProcess is true, the Y position when touch started
-                // If toActivate is true, the last Y position when scroll action was triggered
-    int leftThreshold;
-    int rightThreshold;
-    bool isTouchpad(int fd);
+    int leftThreshold, rightThreshold;
+    int eventX = 0;
+    int eventY = 0;
+    int eventTouch = 0; // 0 = none, 1 = touch, -1 = release
+    bool eventDone = true;
+    bool toProcess = false;
+    bool toActivate = false;
+    bool inLeftEdge = false;
+    int startY = 0;
+    bool inCapturedTouch = false;
+    bool scrollTriggered = false;
+    State lastState = State::Active;
+    std::vector<struct input_event> frameBuffer;
+    std::vector<struct input_event> sequenceBuffer;
+
     void initialize();
-    void processEvent();
+    void resetBufferingState();
+    void flushBufferingState();
+    void processFrame();
     void scrollUp();
     void scrollDown();
+    void decideFate();
 public:
-    Touchpad(std::string deviceFile, Emulator& emulator, bool invertY = false, bool invertX = false);
-    Touchpad(Emulator& emulator, bool invertY = false, bool invertX = false);
+    Touchpad(int fd, Emulator& emulator, AtomicState& state,
+             bool invertY = false, bool invertX = false);
     ~Touchpad();
+    Touchpad(const Touchpad&) = delete;
+    Touchpad& operator=(const Touchpad&) = delete;
+    Touchpad(Touchpad&&) = delete;
+    Touchpad& operator=(Touchpad&&) = delete;
+
     void next(); // Blocking
 };
 
-#endif // CONTROL_TOUCHPAD_H
+#endif

@@ -61,6 +61,18 @@ in {
         emulated scroll event after the threshold is reached.
       '';
     };
+
+    initialState = lib.mkOption {
+      type = lib.types.enum [ "active" "inactive" "disable-touchpad" ];
+      default = "active";
+      description = ''
+        State the daemon starts in. Use `touchpad-enhance-ctl` to switch
+        states at runtime:
+          - `active`: edge-swipe is processed and all other events forwarded.
+          - `inactive`: every event is forwarded verbatim, no processing.
+          - `disable-touchpad`: the (grabbed) touchpad is silenced entirely.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -74,7 +86,7 @@ in {
         Type = "simple";
         User = "root";
         Group = "root";
-        ExecStart = "${pkg}/bin/touchpad-enhance";
+        ExecStart = "${pkg}/bin/touchpad-enhance ${cfg.initialState}";
         Restart = "always";
         RestartSec = 3;
         StandardOutput = "journal";
