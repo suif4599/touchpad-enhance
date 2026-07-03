@@ -76,6 +76,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [ pkg ];
+
     systemd.services.touchpad-enhance = {
       description = "Touchpad Enhance - edge swipe for brightness and volume";
       documentation = [ "https://github.com/suif4599/touchpad-enhance" ];
