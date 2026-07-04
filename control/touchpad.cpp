@@ -136,6 +136,12 @@ void Touchpad::flushBufferingState() {
     resetBufferingState();
 }
 
+void Touchpad::maybeForward(const struct input_event& ev) {
+    // Suppressed in ControlOnly mode — edge-scroll processing still runs,
+    // but the touchpad-mirror device stays silent so the cursor doesn't move.
+    if (forwardingEnabled) emulator.forward(ev);
+}
+
 Touchpad::Touchpad(int fd, Emulator& emulator, AtomicState& state,
                    bool invertY, bool invertX)
 : fd(fd), emulator(emulator), state(state),
@@ -253,7 +259,7 @@ void Touchpad::decideFate() {
 
         if (sequenceEnds) {
             if (!scrollTriggered) {
-                for (const auto& e : sequenceBuffer) emulator.forward(e);
+                for (const auto& e : sequenceBuffer) maybeForward(e);
             }
             sequenceBuffer.clear();
             inCapturedTouch = false;
@@ -268,7 +274,7 @@ void Touchpad::decideFate() {
         inCapturedTouch = true;
         scrollTriggered = false;
     } else {
-        for (const auto& e : frameBuffer) emulator.forward(e);
+        for (const auto& e : frameBuffer) maybeForward(e);
     }
 }
 
@@ -299,6 +305,11 @@ void Touchpad::next() {
         emulator.forward(ev);
         return;
     }
+
+    // Active and ControlOnly share the edge-scroll processing path; the
+    // difference is whether decideFate() actually forwards buffered events
+    // to the touchpad-mirror device.
+    forwardingEnabled = (s == State::Active);
 
     frameBuffer.push_back(ev);
 

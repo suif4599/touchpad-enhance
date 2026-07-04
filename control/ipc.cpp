@@ -65,6 +65,7 @@ std::string handleCommand(const std::string& line, AtomicState& state) {
     if (line == "active")           return setOrErr(State::Active);
     if (line == "inactive")         return setOrErr(State::Inactive);
     if (line == "disable-touchpad") return setOrErr(State::DisableTouchpad);
+    if (line == "control-only")     return setOrErr(State::ControlOnly);
     return std::string("ERR unknown command: ") + line;
 }
 

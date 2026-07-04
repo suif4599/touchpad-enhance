@@ -63,7 +63,7 @@ in {
     };
 
     initialState = lib.mkOption {
-      type = lib.types.enum [ "active" "inactive" "disable-touchpad" ];
+      type = lib.types.enum [ "active" "inactive" "disable-touchpad" "control-only" ];
       default = "active";
       description = ''
         State the daemon starts in. Use `touchpad-enhance-ctl` to switch
@@ -71,6 +71,8 @@ in {
           - `active`: edge-swipe is processed and all other events forwarded.
           - `inactive`: every event is forwarded verbatim, no processing.
           - `disable-touchpad`: the (grabbed) touchpad is silenced entirely.
+          - `control-only`: edge-swipe still adjusts brightness/volume, but
+            no events are forwarded — the cursor won't move at all.
       '';
     };
   };

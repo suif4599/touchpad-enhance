@@ -33,6 +33,7 @@ class Touchpad {
     int startY = 0;
     bool inCapturedTouch = false;
     bool scrollTriggered = false;
+    bool forwardingEnabled = true;   // false in ControlOnly: process but don't forward
     State lastState = State::Active;
     std::vector<struct input_event> frameBuffer;
     std::vector<struct input_event> sequenceBuffer;
@@ -40,6 +41,7 @@ class Touchpad {
     void initialize();
     void resetBufferingState();
     void flushBufferingState();
+    void maybeForward(const struct input_event& ev);
     void processFrame();
     void scrollUp();
     void scrollDown();

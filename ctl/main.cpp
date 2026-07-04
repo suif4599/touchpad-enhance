@@ -7,7 +7,7 @@
 namespace {
 
 void usage(const char* prog) {
-    std::cerr << "Usage: " << prog << " <get|active|inactive|disable-touchpad>\n";
+    std::cerr << "Usage: " << prog << " <get|active|inactive|disable-touchpad|control-only>\n";
 }
 
 } // namespace
@@ -22,7 +22,8 @@ int main(int argc, char** argv) {
         usage(argv[0]);
         return 0;
     }
-    if (cmd != "get" && cmd != "active" && cmd != "inactive" && cmd != "disable-touchpad") {
+    if (cmd != "get" && cmd != "active" && cmd != "inactive" &&
+        cmd != "disable-touchpad" && cmd != "control-only") {
         std::cerr << "error: unknown command '" << cmd << "'\n";
         usage(argv[0]);
         return 2;
